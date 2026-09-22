@@ -42,8 +42,9 @@ Plus a `summarize_document` **prompt template** for clients that surface MCP pro
 
 ### Hosted (zero install)
 
-Deploy your own instance on [Glama](https://glama.ai/mcp/hosting) in one click
-from the registry, or run the Docker image below, then point any MCP client at
+One-click deploy your own instance from the
+[doc2md page on Glama](https://glama.ai/mcp/servers/skyzhao1223/doc2md)
+("Deploy Server"), or run the Docker image below, then point any MCP client at
 the Streamable HTTP endpoint:
 
 ```json

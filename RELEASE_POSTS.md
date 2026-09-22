@@ -1,7 +1,6 @@
 # Launch posts — copy/paste drafts
 
-Placeholder to fill after Glama deployment:
-`GLAMA_URL` = your public server page, e.g. `https://glama.ai/mcp/servers/skyzhao1223/doc2md`
+Glama directory page (live): https://glama.ai/mcp/servers/skyzhao1223/doc2md
 
 ---
 
@@ -30,7 +29,7 @@ What it does:
 Security stuff, because it's meant to be exposed: SSRF protection on every URL and redirect hop (private/loopback/link-local IPs rejected), 30 MB caps, non-root container, no persistence — documents are processed in memory and dropped.
 
 - GitHub: https://github.com/skyzhao1223/doc2md
-- Hosted instance (deploy your own in one click via Glama): GLAMA_URL
+- Hosted instance (deploy your own in one click via Glama): https://glama.ai/mcp/servers/skyzhao1223/doc2md
 - 34 tests + CI on Python 3.10–3.12, Docker smoke test included.
 
 Feedback welcome — especially on conversion quality vs. other tools you've tried. Roadmap: formula/LaTeX extraction pass and batch jobs.
@@ -44,7 +43,7 @@ Feedback welcome — especially on conversion quality vs. other tools you've tri
 Pass a URL, get clean Markdown: PDF (tables preserved!), DOCX/PPTX/XLSX/EPUB/HTML, offline OCR for scans, split/merge/search tools. SSRF-safe, 30 MB caps, non-root Docker, AGPL, 34 tests + CI.
 
 GitHub: https://github.com/skyzhao1223/doc2md
-On Glama: GLAMA_URL
+On Glama: https://glama.ai/mcp/servers/skyzhao1223/doc2md
 
 Would love feedback from the team — happy to write up the "URL-first vs local-stdio" design tradeoffs if useful.
 
@@ -63,13 +62,12 @@ Would love feedback from the team — happy to write up the "URL-first vs local-
 5/ SSRF-hardened (every redirect hop IP-checked), 30 MB caps, non-root container, AGPL. 34 tests, CI on 3.10–3.12.
 
 GitHub: https://github.com/skyzhao1223/doc2md
-Deploy in one click on @glama_ai: GLAMA_URL
+Deploy in one click on @glama_ai: https://glama.ai/mcp/servers/skyzhao1223/doc2md
 
 ---
 
 ## Posting checklist
 
-- [ ] Fill in GLAMA_URL after the deployment goes public
 - [ ] Post Reddit on a weekday morning US time (best r/mcp traffic)
 - [ ] Discord: check the channel rules first; some servers want a role/opt-in
 - [ ] Reply to every comment in the first 24h (ranking signal + goodwill)
