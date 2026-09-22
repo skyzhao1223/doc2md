@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "doc2md-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "MCP server that converts PDF, DOCX, PPTX, XLSX, HTML and EPUB documents — from a URL or base64 — into clean Markdown, with table extraction, full-text search and OCR for scanned files. No API key required."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -47,10 +47,10 @@ dev = ["pytest>=8.0", "python-docx>=1.1"]
 doc2md = "doc2md.server:main"
 
 [project.urls]
-Homepage = "https://github.com/YOUR-GITHUB-USERNAME/doc2md"
-Repository = "https://github.com/YOUR-GITHUB-USERNAME/doc2md"
-Issues = "https://github.com/YOUR-GITHUB-USERNAME/doc2md/issues"
-Changelog = "https://github.com/YOUR-GITHUB-USERNAME/doc2md/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/skyzhao1223/doc2md"
+Repository = "https://github.com/skyzhao1223/doc2md"
+Issues = "https://github.com/skyzhao1223/doc2md/issues"
+Changelog = "https://github.com/skyzhao1223/doc2md/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/doc2md"]

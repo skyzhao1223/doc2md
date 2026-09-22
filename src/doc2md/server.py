@@ -30,6 +30,12 @@ from .convert import (
 )
 from .fetch import FetchError, MAX_DOWNLOAD_BYTES, fetch_url
 from .ocr import ocr_document as run_ocr
+from .pdfops import (
+    MAX_MERGE_INPUTS,
+    extract_images as extract_images_impl,
+    merge_pdfs as merge_pdfs_impl,
+    split_pdf as split_pdf_impl,
+)
 from .tables import (
     document_info as build_document_info,
     extract_tables as extract_tables_impl,
@@ -44,9 +50,10 @@ mcp = FastMCP(
     instructions=(
         "doc2md converts documents to clean Markdown for AI agents. Pass a public "
         "http(s) URL or base64-encoded file content — no API key required. "
-        "Supports PDF (text + tables), DOCX, PPTX, XLSX, EPUB, HTML, CSV/JSON/XML "
-        "and scanned documents/images via OCR. Typical flow: get_document_info to "
-        "inspect, convert_pdf_to_markdown (with 'pages' for large files) to read, "
+        "Supports PDF (text + tables + images), DOCX, PPTX, XLSX, EPUB, HTML, "
+        "CSV/JSON/XML and scanned documents/images via OCR; also splits and "
+        "merges PDFs. Typical flow: get_document_info to inspect, "
+        "convert_pdf_to_markdown (with 'pages' for large files) to read, "
         "extract_pdf_tables for tabular data, ocr_document for scanned files."
     ),
 )
@@ -376,6 +383,127 @@ async def ocr_document(
     data, kind = await _load_source(url, file_base64, filename)
     try:
         return await run_ocr(data, kind, pages, password)
+    except ConversionError as exc:
+        raise ToolError(str(exc))
+
+
+@mcp.tool()
+async def split_pdf(
+    url: UrlParam = "",
+    file_base64: Base64Param = "",
+    filename: FilenameParam = "",
+    ranges: Annotated[
+        str,
+        Field(
+            description=(
+                "Page ranges to cut, 1-based and inclusive, e.g. '1-3,5,8-10'. "
+                "Each range becomes one output PDF. Max 20 parts per call."
+            )
+        ),
+    ] = "",
+    password: PasswordParam = "",
+) -> dict:
+    """Split a PDF into multiple PDF documents by page range. Each part comes
+    back with its page count, size and base64 content (parts up to 5 MB),
+    ready to be fed into other doc2md tools or written to a file. Use it to
+    break a large report into chapters, isolate an appendix, or prepare
+    page-limited uploads.
+    """
+    data, kind = await _load_source(url, file_base64, filename)
+    _require_pdf(kind, data)
+    try:
+        return await asyncio.to_thread(partial(split_pdf_impl, data, ranges, password))
+    except ConversionError as exc:
+        raise ToolError(str(exc))
+
+
+@mcp.tool()
+async def merge_pdfs(
+    urls: Annotated[
+        list[str],
+        Field(
+            description=(
+                f"Ordered list of 2-{MAX_MERGE_INPUTS} public http(s) PDF URLs to merge "
+                "into one document. Leave empty when using files_base64."
+            )
+        ),
+    ] = [],
+    files_base64: Annotated[
+        list[str],
+        Field(
+            description=(
+                "Ordered list of base64-encoded PDFs to merge (e.g. parts produced "
+                "by split_pdf). Leave empty when using urls."
+            )
+        ),
+    ] = [],
+) -> dict:
+    """Merge multiple PDFs, in the given order, into a single PDF document.
+    Accepts either public URLs or base64-encoded files (exactly one of the
+    two). Returns the merged file as base64 (up to 10 MB) plus per-input
+    page counts. Useful for re-assembling split reports, combining invoices
+    or building one attachment from several exports.
+    """
+    urls = [u.strip() for u in (urls or []) if u and u.strip()]
+    files = [f.strip() for f in (files_base64 or []) if f and f.strip()]
+    if bool(urls) == bool(files):
+        raise ToolError(
+            "Provide exactly one source list: 'urls' (http/https links) or "
+            "'files_base64' (base64-encoded PDFs)."
+        )
+
+    documents: list[bytes] = []
+    if urls:
+        if len(urls) > MAX_MERGE_INPUTS:
+            raise ToolError(f"Too many URLs: {len(urls)} (max {MAX_MERGE_INPUTS}).")
+        semaphore = asyncio.Semaphore(3)
+
+        async def _fetch_one(u: str) -> bytes:
+            async with semaphore:
+                try:
+                    data, _ct, _final = await fetch_url(u)
+                except FetchError as exc:
+                    raise ToolError(f"Failed to fetch {u}: {exc}")
+                return data
+
+        documents = list(await asyncio.gather(*(_fetch_one(u) for u in urls)))
+    else:
+        if len(files) > MAX_MERGE_INPUTS:
+            raise ToolError(f"Too many files: {len(files)} (max {MAX_MERGE_INPUTS}).")
+        for i, f in enumerate(files):
+            try:
+                documents.append(base64.b64decode(f, validate=True))
+            except (binascii.Error, ValueError) as exc:
+                raise ToolError(f"files_base64[{i}] is not valid base64: {exc}")
+
+    try:
+        return await asyncio.to_thread(merge_pdfs_impl, documents)
+    except ConversionError as exc:
+        raise ToolError(str(exc))
+
+
+@mcp.tool()
+async def extract_pdf_images(
+    url: UrlParam = "",
+    file_base64: Base64Param = "",
+    filename: FilenameParam = "",
+    pages: PagesParam = "",
+    password: PasswordParam = "",
+    max_images: Annotated[int, Field(description="Maximum images to return (default 20, max 50).")] = 20,
+    include_base64: Annotated[bool, Field(description="Include base64 content for each image up to 2 MB (default false: metadata only).")] = False,
+) -> dict:
+    """List and optionally export the images embedded in a PDF — figures,
+    charts, logos and scanned page bitmaps — with page number, pixel
+    dimensions, format and size. Set include_base64=true to get the actual
+    image data (each up to 2 MB) for saving or further processing. Duplicate
+    images are reported once.
+    """
+    data, kind = await _load_source(url, file_base64, filename)
+    _require_pdf(kind, data)
+    try:
+        return await asyncio.to_thread(
+            partial(extract_images_impl, data, pages, password, int(max_images or 20), bool(include_base64))
+        )
     except ConversionError as exc:
         raise ToolError(str(exc))
 

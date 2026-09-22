@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-22
+
+### Added
+
+- New tools: `split_pdf` (ranges → base64 parts, 5 MB each), `merge_pdfs`
+  (URLs or base64 inputs, 10 MB merged output), `extract_pdf_images`
+  (metadata + optional base64 export, 2 MB per image).
+- Multi-stage Dockerfile: slimmer runtime image (bytecode caches trimmed).
+
+### Fixed
+
+- Disabled pymupdf4llm's implicit auto-OCR (`use_ocr=False`) for
+  deterministic conversions; scanned documents are routed through the
+  explicit `ocr_document` tool instead. Fixes `'RapidOCR' object has no
+  attribute 'text_detector'` on PDFs containing images with
+  rapidocr-onnxruntime 1.4.x.
+
 ## [0.1.0] - 2026-09-22
 
 ### Added

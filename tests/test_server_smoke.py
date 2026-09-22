@@ -15,6 +15,9 @@ EXPECTED_TOOLS = {
     "get_document_info",
     "search_document",
     "ocr_document",
+    "split_pdf",
+    "merge_pdfs",
+    "extract_pdf_images",
 }
 
 
@@ -156,3 +159,41 @@ async def test_ocr_image(sample_png_bytes):
         assert not result.isError
         out = _structured(result)
         assert "Doc2md" in out.get("text", "") or "Sample" in out.get("text", "")
+
+
+@pytest.mark.anyio
+async def test_split_and_merge_via_mcp(sample_pdf):
+    b64 = base64.b64encode(sample_pdf).decode()
+    async with _connect() as session:
+        split = _structured(
+            await session.call_tool(
+                "split_pdf", {"file_base64": b64, "ranges": "1,2"}
+            )
+        )
+        assert split["part_count"] == 2
+
+        merged = _structured(
+            await session.call_tool(
+                "merge_pdfs",
+                {"files_base64": [p["file_base64"] for p in split["parts"]]},
+            )
+        )
+        assert merged["page_count"] == 2
+        assert merged["file_base64"]
+
+        # error path: neither urls nor files
+        bad = await session.call_tool("merge_pdfs", {})
+        assert bad.isError
+
+
+@pytest.mark.anyio
+async def test_extract_images_via_mcp(scanned_pdf):
+    b64 = base64.b64encode(scanned_pdf).decode()
+    async with _connect() as session:
+        out = _structured(
+            await session.call_tool(
+                "extract_pdf_images", {"file_base64": b64, "include_base64": True}
+            )
+        )
+        assert out["image_count"] >= 1
+        assert out["images"][0]["base64"]

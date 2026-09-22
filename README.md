@@ -32,6 +32,9 @@ Markdown back in one call.
 | `get_document_info` | Format, page count, metadata, table of contents, scanned/encrypted flags. |
 | `search_document` | Full-text keyword search with page numbers + snippets. |
 | `ocr_document` | OCR for scanned PDFs and images (PNG/JPEG/WebP/BMP/TIFF), up to 30 pages per call. |
+| `split_pdf` | Cut a PDF into parts by page range (`'1-3,5,8-10'`); each part returned as base64 (≤5 MB). |
+| `merge_pdfs` | Merge 2–10 PDFs (URLs or base64) into one document, returned as base64 (≤10 MB). |
+| `extract_pdf_images` | List/export embedded images (figures, charts, scans) with page, dimensions, format; optional base64 (≤2 MB each). |
 
 Plus a `summarize_document` **prompt template** for clients that surface MCP prompts.
 
@@ -61,7 +64,7 @@ the Streamable HTTP endpoint:
   "mcpServers": {
     "doc2md": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/YOUR-GITHUB-USERNAME/doc2md#egg=doc2md-mcp[ocr]", "doc2md"]
+      "args": ["--from", "git+https://github.com/skyzhao1223/doc2md#egg=doc2md-mcp[ocr]", "doc2md"]
     }
   }
 }
@@ -79,7 +82,7 @@ docker run --rm -p 8000:8000 \
 ### From source
 
 ```bash
-git clone https://github.com/YOUR-GITHUB-USERNAME/doc2md && cd doc2md
+git clone https://github.com/skyzhao1223/doc2md && cd doc2md
 uv sync --extra ocr --extra dev
 uv run doc2md          # stdio server
 uv run pytest          # test suite
@@ -106,6 +109,9 @@ agent → read_pdf_pages {"url": "...", "pages": "8-9"}
 | Default response size | 40,000 chars (max 200,000), with `offset` continuation |
 | OCR pages per call | 30 (renders at 200 dpi) |
 | Table scan depth | first 100 pages per call, 50 tables max |
+| Split | ≤20 parts per call, base64 included for parts ≤5 MB |
+| Merge | ≤10 inputs, merged output ≤10 MB |
+| Image export | ≤50 images per call, base64 for images ≤2 MB |
 | URL fetch | public http(s) only, ≤5 redirects, SSRF-filtered |
 
 ## Self-hosting notes
@@ -123,10 +129,10 @@ agent → read_pdf_pages {"url": "...", "pages": "8-9"}
 
 ```bash
 uv sync --extra dev --extra ocr
-uv run pytest            # 20+ tests: detection, conversion, tables, SSRF, in-process MCP smoke tests
+uv run pytest            # 40+ tests: detection, conversion, tables, split/merge, SSRF, in-process MCP smoke tests
 ```
 
-Layout: `src/doc2md/{server,convert,tables,ocr,fetch,detect,cache}.py`.
+Layout: `src/doc2md/{server,convert,tables,pdfops,ocr,fetch,detect,cache}.py`.
 
 ## Security
 
@@ -147,6 +153,7 @@ server over a network, you must offer your users its source.
 ## Roadmap
 
 - [ ] Formula / LaTeX extraction quality pass
-- [ ] `split_pdf`, `merge_pdf` utility tools
-- [ ] Image extraction (`write_images`) with data-URI or hosted output
+- [x] `split_pdf`, `merge_pdfs` utility tools (v0.2.0)
+- [x] Image extraction via `extract_pdf_images` with base64 export (v0.2.0)
 - [ ] PyPI release (`doc2md-mcp`)
+- [ ] Batch/webhook conversion jobs for very large documents
