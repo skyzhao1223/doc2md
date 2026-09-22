@@ -51,6 +51,12 @@ async def test_tools_are_listed_with_descriptions(sample_pdf):
         assert EXPECTED_TOOLS <= set(tools)
         for name in EXPECTED_TOOLS:
             assert tools[name].description and len(tools[name].description) > 40
+            ann = tools[name].annotations
+            assert ann is not None, f"{name} missing tool annotations"
+            assert ann.readOnlyHint is True
+            assert ann.destructiveHint is False
+            assert ann.idempotentHint is True
+            assert ann.openWorldHint is True
 
 
 @pytest.mark.anyio

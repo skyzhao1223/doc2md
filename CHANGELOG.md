@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-09-22
+
+### Added
+
+- MCP tool annotations on all 10 tools (`readOnlyHint`, `destructiveHint`,
+  `idempotentHint`, `openWorldHint`) — machine-readable behaviour disclosure
+  for MCP clients and registry scoring (Glama TDQS Behavior dimension).
+
+### Fixed
+
+- PyPI metadata: license is now the SPDX expression `AGPL-3.0-or-later`
+  (PEP 639) instead of the full license text.
+
 ## [0.2.0] - 2026-09-22
 
 ### Added

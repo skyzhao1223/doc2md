@@ -4,10 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "doc2md-mcp"
-version = "0.2.0"
+version = "0.2.1"
 description = "MCP server that converts PDF, DOCX, PPTX, XLSX, HTML and EPUB documents — from a URL or base64 — into clean Markdown, with table extraction, full-text search and OCR for scanned files. No API key required."
 readme = "README.md"
-license = { file = "LICENSE" }
+license = "AGPL-3.0-or-later"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 authors = [{ name = "doc2md maintainers" }]
 keywords = [
@@ -25,7 +26,6 @@ keywords = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",

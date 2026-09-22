@@ -94,6 +94,19 @@ PasswordParam = Annotated[
     str, Field(description="Password for encrypted PDFs. Empty for normal files.")
 ]
 
+# MCP tool annotations (spec 2025-06-18). Every doc2md tool is a pure
+# read/convert operation: it never mutates server or client state, is safe
+# to retry with identical results, and may reach out to the public web when
+# a URL source is supplied. Declared machine-readably so MCP clients and
+# registries (e.g. Glama TDQS) can reason about behaviour without parsing
+# prose.
+READ_ONLY_ANNOTATIONS = {
+    "readOnlyHint": True,
+    "destructiveHint": False,
+    "idempotentHint": True,
+    "openWorldHint": True,
+}
+
 
 async def _load_source(url: str, file_base64: str, filename: str) -> tuple[bytes, str]:
     """Resolve tool input to (document bytes, detected kind)."""
@@ -166,7 +179,7 @@ def _truncate_footer(tool: str, offset: int, end: int, total: int) -> str:
 # ---------------------------------------------------------------------------
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_ANNOTATIONS)
 async def convert_pdf_to_markdown(
     url: UrlParam = "",
     file_base64: Base64Param = "",
@@ -203,7 +216,7 @@ async def convert_pdf_to_markdown(
     return chunk
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_ANNOTATIONS)
 async def convert_document_to_markdown(
     url: UrlParam = "",
     file_base64: Base64Param = "",
@@ -261,7 +274,7 @@ async def convert_document_to_markdown(
     return chunk
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_ANNOTATIONS)
 async def extract_pdf_tables(
     url: UrlParam = "",
     file_base64: Base64Param = "",
@@ -286,7 +299,7 @@ async def extract_pdf_tables(
         raise ToolError(str(exc))
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_ANNOTATIONS)
 async def read_pdf_pages(
     url: UrlParam = "",
     file_base64: Base64Param = "",
@@ -323,7 +336,7 @@ async def read_pdf_pages(
         raise ToolError(str(exc))
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_ANNOTATIONS)
 async def get_document_info(
     url: UrlParam = "",
     file_base64: Base64Param = "",
@@ -342,7 +355,7 @@ async def get_document_info(
         raise ToolError(str(exc))
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_ANNOTATIONS)
 async def search_document(
     url: UrlParam = "",
     file_base64: Base64Param = "",
@@ -366,7 +379,7 @@ async def search_document(
         raise ToolError(str(exc))
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_ANNOTATIONS)
 async def ocr_document(
     url: UrlParam = "",
     file_base64: Base64Param = "",
@@ -387,7 +400,7 @@ async def ocr_document(
         raise ToolError(str(exc))
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_ANNOTATIONS)
 async def split_pdf(
     url: UrlParam = "",
     file_base64: Base64Param = "",
@@ -417,7 +430,7 @@ async def split_pdf(
         raise ToolError(str(exc))
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_ANNOTATIONS)
 async def merge_pdfs(
     urls: Annotated[
         list[str],
@@ -482,7 +495,7 @@ async def merge_pdfs(
         raise ToolError(str(exc))
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_ANNOTATIONS)
 async def extract_pdf_images(
     url: UrlParam = "",
     file_base64: Base64Param = "",
