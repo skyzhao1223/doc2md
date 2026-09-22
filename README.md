@@ -65,7 +65,7 @@ the Streamable HTTP endpoint:
   "mcpServers": {
     "doc2md": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/skyzhao1223/doc2md#egg=doc2md-mcp[ocr]", "doc2md"]
+      "args": ["--from", "doc2md-mcp[ocr]", "doc2md"]
     }
   }
 }
@@ -83,6 +83,10 @@ docker run --rm -p 8000:8000 \
 ### From source
 
 ```bash
+pip install "doc2md-mcp[ocr]"   # or: uvx --from "doc2md-mcp[ocr]" doc2md
+doc2md                          # stdio server
+
+# or from source
 git clone https://github.com/skyzhao1223/doc2md && cd doc2md
 uv sync --extra ocr --extra dev
 uv run doc2md          # stdio server
@@ -156,5 +160,5 @@ server over a network, you must offer your users its source.
 - [ ] Formula / LaTeX extraction quality pass
 - [x] `split_pdf`, `merge_pdfs` utility tools (v0.2.0)
 - [x] Image extraction via `extract_pdf_images` with base64 export (v0.2.0)
-- [ ] PyPI release (`doc2md-mcp`)
+- [x] PyPI release: [`doc2md-mcp`](https://pypi.org/project/doc2md-mcp/) (v0.2.0)
 - [ ] Batch/webhook conversion jobs for very large documents
