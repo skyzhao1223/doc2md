@@ -19,7 +19,7 @@ PyPI (live): https://pypi.org/project/doc2md-mcp/
 
 **Body:**
 
-**TL;DR:** `doc2md` is an open-source MCP server (AGPL) that converts PDF / DOCX / PPTX / XLSX / EPUB / HTML to clean Markdown from a **URL or base64** — tables preserved, offline OCR for scans, paginated output so your context window survives. Install with `uvx`, run the Docker image, or one-click deploy on Glama.
+**TL;DR:** `doc2md` is an open-source MCP server (AGPL) that converts PDF / DOCX / PPTX / XLSX / EPUB / HTML to clean Markdown from a **URL or base64** — tables preserved, offline OCR for scans, paginated output so your context window survives. Install with `uvx`, pull `ghcr.io/skyzhao1223/doc2md`, or one-click deploy on Glama.
 
 **Why I built it.** Document-heavy agent workflows keep hitting the same wall: cloud agents can't reach local-only stdio servers, conversion SaaS APIs mean keys + billing + upload policies, and naive PDF→text dumps flatten tables into noise. I wanted one tool where an agent just hands over a URL and gets Markdown back — deployable anywhere, keyless.
 
@@ -32,7 +32,7 @@ PyPI (live): https://pypi.org/project/doc2md-mcp/
 - `ocr_document` — offline OCR (RapidOCR/ONNX) for scanned PDFs, receipts, screenshots. No cloud OCR API, no per-page bill.
 - `split_pdf` / `merge_pdfs` / `extract_pdf_images` — the PDF plumbing agents keep needing.
 
-**Real run against the Attention paper** (not a curated example, just `arxiv.org`):
+**Real run against the Attention paper** (actual arxiv.org output, whitespace lightly normalized — raw extraction keeps PDF spacing quirks):
 
 ```
 get_document_info {"url": "https://arxiv.org/pdf/1706.03762"}
@@ -57,7 +57,13 @@ extract_pdf_tables {"url": "…", "pages": "8-9", "format": "markdown"}
 }
 ```
 
-or `pip install "doc2md-mcp[ocr]"`, or the Docker image (`DOC2MD_TRANSPORT=streamable-http` for a remote endpoint).
+or `pip install "doc2md-mcp[ocr]"`, or Docker:
+
+```bash
+docker run -i ghcr.io/skyzhao1223/doc2md                                    # stdio
+docker run -p 8000:8000 -e DOC2MD_TRANSPORT=streamable-http \
+  ghcr.io/skyzhao1223/doc2md                                                # remote endpoint
+```
 
 **Honesty corner:** yes, the `[ocr]` extra pulls opencv + onnxruntime (~60 packages). That's the price of *fully offline* OCR. Skip the extra and core conversion still works — and every tool degrades with an actionable error instead of crashing. Also: all 10 tools declare MCP annotations (`readOnlyHint`, `idempotentHint`, …) so your client knows they're pure, retry-safe reads.
 
@@ -80,6 +86,7 @@ Feedback welcome — especially conversion quality vs. whatever you've tried. Ro
 Pass a URL, get clean Markdown: PDF (tables preserved!), DOCX/PPTX/XLSX/EPUB/HTML, offline OCR for scans, split/merge/search — 10 tools, all with MCP annotations. SSRF-safe, 30 MB caps, non-root Docker, AGPL, 34 tests + CI. TDQS: all A so far 🎉
 
 - Run locally: `uvx --from 'doc2md-mcp[ocr]' doc2md`
+- Docker: `ghcr.io/skyzhao1223/doc2md`
 - GitHub: https://github.com/skyzhao1223/doc2md
 - On Glama: https://glama.ai/mcp/servers/skyzhao1223/doc2md
 
@@ -99,7 +106,7 @@ Happy to write up the "URL-first vs local-stdio" design tradeoffs if anyone's in
 
 5/ SSRF-hardened (every redirect hop IP-checked), 30 MB caps, non-root container, AGPL. 34 tests, CI on 3.10–3.12.
 
-Install: uvx --from 'doc2md-mcp[ocr]' doc2md
+Install: uvx --from 'doc2md-mcp[ocr]' doc2md · Docker: ghcr.io/skyzhao1223/doc2md
 GitHub: https://github.com/skyzhao1223/doc2md
 On @glama_ai (one-click deploy): https://glama.ai/mcp/servers/skyzhao1223/doc2md
 

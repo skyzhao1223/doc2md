@@ -74,10 +74,12 @@ the Streamable HTTP endpoint:
 ### Docker
 
 ```bash
-docker build -t doc2md .
-docker run --rm -i doc2md                      # stdio
+docker run --rm -i ghcr.io/skyzhao1223/doc2md                    # stdio
 docker run --rm -p 8000:8000 \
-  -e DOC2MD_TRANSPORT=streamable-http doc2md   # HTTP endpoint
+  -e DOC2MD_TRANSPORT=streamable-http ghcr.io/skyzhao1223/doc2md # HTTP endpoint
+
+# or build from source
+docker build -t doc2md . && docker run --rm -i doc2md
 ```
 
 ### From source
